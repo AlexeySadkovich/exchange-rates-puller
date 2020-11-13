@@ -20,6 +20,9 @@
         </label>
         <button id="confirm-btn" type="submit">Get</button>
     </div>
+    <div id="result-tables">
+
+    </div>
 </main>
 </body>
 <style>
@@ -27,6 +30,7 @@
         margin: 0 auto;
         width: 70%;
         display: flex;
+        flex-direction: column;
         justify-content: center;
     }
 
@@ -34,7 +38,8 @@
         display: flex;
         justify-content: center;
         flex-direction: column;
-        margin-top: 20%;
+        margin: 10% auto 0;
+        width: 20%;
     }
 
     .get-rates-form label {
@@ -46,6 +51,30 @@
         justify-content: space-between;
     }
 
+    #result-tables {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+    }
+
+    #result-tables > div {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+    }
+
+    #result-tables > div > table {
+        margin-top: 10px;
+        border-collapse: collapse;
+        border: 1px solid black;
+    }
+
+    #result-tables > div > th, td {
+        border-collapse: collapse;
+        border: 1px solid black;
+    }
+
+
 </style>
 
 <script>
@@ -53,27 +82,67 @@
     let dateTo = document.querySelector('#date-to-input')
     let confirmBtn = document.querySelector('#confirm-btn')
 
-    const renderTable = (data) => {
-        // TODO
+    let tables = document.querySelector('#result-tables')
+
+    const generateInformation = (table, data) => {
+        console.log(data)
+        for (let block in data) {
+            let row = table.insertRow()
+            for (let key in data[block]) {
+                let cell = row.insertCell()
+                let text = document.createTextNode(data[block][key])
+                cell.appendChild(text)
+            }
+        }
     }
 
-    confirmBtn.addEventListener('click', async () => {
+    const renderTable = (data) => {
+        for (let day in data) {
+            let contatiner = document.createElement('div')
+            let header = document.createElement('h3')
+            let table = document.createElement('table')
+
+            header.innerHTML = day
+
+            contatiner.appendChild(header)
+            contatiner.appendChild(table)
+            tables.appendChild(contatiner)
+
+            let thead = table.createTHead()
+            let row = thead.insertRow()
+
+            for (let key in data[day][0]) {
+                let th = document.createElement("th")
+                let text = document.createTextNode(key)
+
+                th.appendChild(text)
+                row.appendChild(th)
+            }
+
+            generateInformation(table, data[day])
+        }
+    }
+
+    confirmBtn.addEventListener('click', () => {
         let data = {
             "date-from": dateFrom.value,
             "date-to": dateTo.value
         }
 
-        let response = await fetch("http://127.0.0.1:5000/get/rates", {
+        fetch("http://127.0.0.1:5000/rates/get", {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json;charset=utf-8'
             },
             body: JSON.stringify(data)
-        })
-
-        if (response.ok) {
-            renderTable(response.json())
-        }
+        }).then(response => {
+                if (response.ok) {
+                    response.json().then(data => {
+                        renderTable(data)
+                    })
+                }
+            }
+        )
     })
 </script>
 </html>
