@@ -1,0 +1,21 @@
+version: '3.8'
+
+services:
+  app:
+    build: .
+    env_file:
+      - ./.env
+    ports:
+      - 80:5000
+
+  mongodb:
+    image: mongo
+    env_file:
+      - ./.env
+    volumes:
+      - mongo_data:/var/lib/mongo/
+    ports:
+    - ${MONGO_PORT}:${MONGO_PORT}
+
+volumes:
+  mongo_data:
