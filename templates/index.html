@@ -53,19 +53,27 @@
     let dateTo = document.querySelector('#date-to-input')
     let confirmBtn = document.querySelector('#confirm-btn')
 
-    let data = {
-        "date-from": dateFrom.value,
-        "date-to": dateTo.value
+    const renderTable = (data) => {
+        // TODO
     }
 
-    confirmBtn.addEventListener('click', () => {
-        let response = fetch("http://127.0.0.1:5000/get/rates", {
+    confirmBtn.addEventListener('click', async () => {
+        let data = {
+            "date-from": dateFrom.value,
+            "date-to": dateTo.value
+        }
+
+        let response = await fetch("http://127.0.0.1:5000/get/rates", {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json;charset=utf-8'
             },
             body: JSON.stringify(data)
         })
+
+        if (response.ok) {
+            renderTable(response.json())
+        }
     })
 </script>
 </html>
