@@ -17,7 +17,7 @@ def get_rates():
      date-from and date-to fields in request"""
     data = request.get_json()
 
-    result = services.request_rates(data["date-from"], data["date-to"])
+    result = services.get_rates(data["date-from"], data["date-to"], "all")
     response = json.dumps(result)
 
     return response

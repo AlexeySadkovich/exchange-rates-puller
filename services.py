@@ -9,14 +9,32 @@ SERVICE_URL = "http://www.cbr.ru/DailyInfoWebServ/DailyInfo.asmx?WSDL"
 DELTA_TIME = timedelta(days=1)
 
 
-def request_rates(data_from: str, data_to: str) -> Dict:
+def get_rates(date_from: str, date_to: str, cur: str) -> Dict:
+    date_from = datetime.strptime(date_from, "%Y-%m-%d")
+    date_to = datetime.strptime(date_to, "%Y-%m-%d")
+
+    rates = _request_rates(date_from, date_to)
+
+    result = {}
+
+    for i in rates:
+        index = 0
+        for curr in rates[i]:
+            if curr["VchCode"] == "EUR":
+                result[i] = {}
+                result[i][index] = curr
+
+            index += 1
+
+    return result
+
+
+def _request_rates(date_from: datetime, date_to: datetime) -> Dict:
     """Return information about currency rates from cbr web service"""
     result = {}
-    data_from = datetime.strptime(data_from, "%Y-%m-%d")
-    data_to = datetime.strptime(data_to, "%Y-%m-%d")
-    start_date = data_from
+    start_date = date_from
 
-    while start_date <= data_to:
+    while start_date <= date_to:
         client = Client(SERVICE_URL)
         xml = client.service.GetCursOnDateXML(start_date)
 
