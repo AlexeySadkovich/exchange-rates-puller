@@ -2,9 +2,8 @@ import json
 
 from flask import request, render_template
 
-import database
-import services
 from app import app
+from . import database, services
 
 
 @app.route('/')
