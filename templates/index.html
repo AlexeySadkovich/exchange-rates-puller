@@ -59,6 +59,8 @@
             </select>
         </label>
         <button id="confirm-btn" type="submit">Get</button>
+        <button id="save-btn" type="submit">Save</button>
+        <p id="message"></p>
     </div>
     <div id="result-tables">
 
@@ -115,7 +117,14 @@
         border: 1px solid black;
     }
 
+    #save-btn {
+        margin-top: 5px;
+        display: none;
+    }
 
+    #message {
+        display: none;
+    }
 </style>
 
 <script>
@@ -123,6 +132,10 @@
     let dateTo = document.querySelector('#date-to-input')
     let currency = document.querySelector('#currency')
     let confirmBtn = document.querySelector('#confirm-btn')
+    let saveBtn = document.querySelector('#save-btn')
+    let messageField = document.querySelector('#message')
+
+    let currentOptions = {}
 
     const generateInformation = (table, data) => {
         console.log(data)
@@ -169,13 +182,19 @@
     }
 
     confirmBtn.addEventListener('click', () => {
+        saveBtn.style.display = 'none'
+        messageField.style.display = 'block'
+        messageField.innerHTML = 'loading...'
+
         let data = {
             "date-from": dateFrom.value,
             "date-to": dateTo.value,
             "currency": currency.value
         }
 
-        fetch("http://127.0.0.1:5000/rates/get", {
+        currentOptions = data
+
+        fetch('http://127.0.0.1:5000/rates/get', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json;charset=utf-8'
@@ -185,7 +204,28 @@
                 if (response.ok) {
                     response.json().then(data => {
                         renderTables(data)
-                    })
+                        messageField.style.display = 'none'
+                        saveBtn.style.display = 'block'
+                    });
+                }
+            }
+        )
+    });
+
+    saveBtn.addEventListener('click', () => {
+        fetch('http://127.0.0.1:5000/rates/save', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json;charset=utf-8'
+            },
+            body: JSON.stringify(currentOptions)
+        }).then(response => {
+                if (response.ok) {
+                    response.json().then(data => {
+                        saveBtn.style.display = 'none'
+                        messageField.innerHTML =  "Entry " + data['name'] + " saved"
+                        messageField.style.display = 'block'
+                    });
                 }
             }
         )

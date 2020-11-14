@@ -2,6 +2,7 @@ import json
 
 from flask import request, render_template
 
+import database
 import services
 from app import app
 
@@ -17,7 +18,28 @@ def get_rates():
      date-from and date-to fields in request"""
     data = request.get_json()
 
-    result = services.get_rates(data["date-from"], data["date-to"], data["currency"])
-    response = json.dumps(result)
+    currency_rates = services.get_rates(data["date-from"], data["date-to"], data["currency"])
+    response = json.dumps(currency_rates)
 
     return response
+
+
+@app.route('/rates', methods=['GET'])
+def get_saves_rates():
+    """Return list of currency rates saved in database"""
+    currency_rates = database.get_all()
+    response = json.dumps(currency_rates)
+    return response
+
+
+@app.route('/rates/save', methods=['POST'])
+def save_rates():
+    """Save exchange rates to database"""
+    data = request.get_json()
+
+    currency_rates = services.get_rates(data["date-from"], data["date-to"], data["currency"])
+    name = f'{data["date-from"]}|{data["date-to"]}|{data["currency"]}'
+    saved_entry = database.save(name, currency_rates)
+
+    return saved_entry
+

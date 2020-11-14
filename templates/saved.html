@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Show currency rates</title>
+</head>
+<body>
+<main>
+    <div id="result-tables">
+
+    </div>
+</main>
+</body>
+<style>
+    main {
+        margin: 0 auto;
+        width: 70%;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+    }
+
+    #result-tables {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+    }
+
+    #result-tables > div {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+    }
+
+    #result-tables > div > table {
+        margin-top: 10px;
+        border-collapse: collapse;
+        border: 1px solid black;
+    }
+
+    #result-tables > div > th, td {
+        border-collapse: collapse;
+        border: 1px solid black;
+    }
+</style>
+
+<script>
+    let tables = document.querySelector('#result-tables')
+
+    const generateInformation = (table, data) => {
+        console.log(data)
+        for (let block in data) {
+            let row = table.insertRow()
+            for (let key in data[block]) {
+                let cell = row.insertCell()
+                let text = document.createTextNode(data[block][key])
+                cell.appendChild(text)
+            }
+        }
+    }
+
+    const renderTables = (data) => {
+        let tables = document.querySelector('#result-tables')
+        while (tables.lastElementChild) {
+            tables.removeChild(tables.lastElementChild)
+        }
+
+        for (let day in data) {
+            let container = document.createElement('div')
+            let header = document.createElement('h3')
+            let table = document.createElement('table')
+
+            header.innerHTML = day
+
+            container.appendChild(header)
+            container.appendChild(table)
+            tables.appendChild(container)
+
+            let thead = table.createTHead()
+            let row = thead.insertRow()
+
+            for (let key in data[day][0]) {
+                let th = document.createElement("th")
+                let text = document.createTextNode(key)
+
+                th.appendChild(text)
+                row.appendChild(th)
+            }
+
+            generateInformation(table, data[day])
+        }
+    }
+
+    fetch('http://127.0.0.1/rates')
+    .then(response => {
+        response.json().then(data => {
+            for (let entry in data) {
+                let header = document.createElement('h2')
+                header.innerHTML = entry
+                tables.appendChild(header)
+
+                renderTables(data[entry])
+            }
+        })
+    })
+</script>
+</html>
