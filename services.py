@@ -9,22 +9,24 @@ SERVICE_URL = "http://www.cbr.ru/DailyInfoWebServ/DailyInfo.asmx?WSDL"
 DELTA_TIME = timedelta(days=1)
 
 
-def get_rates(date_from: str, date_to: str, cur: str) -> Dict:
+def get_rates(date_from: str, date_to: str, currency: str) -> Dict:
     date_from = datetime.strptime(date_from, "%Y-%m-%d")
     date_to = datetime.strptime(date_to, "%Y-%m-%d")
 
     rates = _request_rates(date_from, date_to)
+
+    if currency == "All":
+        return rates
 
     result = {}
 
     for i in rates:
         index = 0
         for curr in rates[i]:
-            if curr["VchCode"] == "EUR":
+            if curr["VchCode"] == currency:
                 result[i] = {}
                 result[i][index] = curr
-
-            index += 1
+                index += 1
 
     return result
 

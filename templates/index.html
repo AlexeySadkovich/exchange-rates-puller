@@ -18,6 +18,46 @@
             Date to:
             <input type="date" id="date-to-input"/>
         </label>
+        <label>
+            Currency:
+            <select id="currency">
+                <option>All</option>
+                <option>AUD</option>
+                <option>AZN</option>
+                <option>GBP</option>
+                <option>AMD</option>
+                <option>BYN</option>
+                <option>BGN</option>
+                <option>BRL</option>
+                <option>HUF</option>
+                <option>HKD</option>
+                <option>DKK</option>
+                <option>USD</option>
+                <option>EUR</option>
+                <option>INR</option>
+                <option>KZT</option>
+                <option>CAD</option>
+                <option>KGS</option>
+                <option>CNY</option>
+                <option>MDL</option>
+                <option>NOK</option>
+                <option>PLN</option>
+                <option>RON</option>
+                <option>XDR</option>
+                <option>SGD</option>
+                <option>TJS</option>
+                <option>TRY</option>
+                <option>TMT</option>
+                <option>UZS</option>
+                <option>UAH</option>
+                <option>CZK</option>
+                <option>SEK</option>
+                <option>CHF</option>
+                <option>ZAR</option>
+                <option>KRW</option>
+                <option>JPY</option>
+            </select>
+        </label>
         <button id="confirm-btn" type="submit">Get</button>
     </div>
     <div id="result-tables">
@@ -39,7 +79,8 @@
         justify-content: center;
         flex-direction: column;
         margin: 10% auto 0;
-        width: 20%;
+        min-width: 20%;
+        max-width: 40%;
     }
 
     .get-rates-form label {
@@ -80,9 +121,8 @@
 <script>
     let dateFrom = document.querySelector('#date-from-input')
     let dateTo = document.querySelector('#date-to-input')
+    let currency = document.querySelector('#currency')
     let confirmBtn = document.querySelector('#confirm-btn')
-
-    let tables = document.querySelector('#result-tables')
 
     const generateInformation = (table, data) => {
         console.log(data)
@@ -96,17 +136,22 @@
         }
     }
 
-    const renderTable = (data) => {
+    const renderTables = (data) => {
+        let tables = document.querySelector('#result-tables')
+        while (tables.lastElementChild) {
+            tables.removeChild(tables.lastElementChild)
+        }
+
         for (let day in data) {
-            let contatiner = document.createElement('div')
+            let container = document.createElement('div')
             let header = document.createElement('h3')
             let table = document.createElement('table')
 
             header.innerHTML = day
 
-            contatiner.appendChild(header)
-            contatiner.appendChild(table)
-            tables.appendChild(contatiner)
+            container.appendChild(header)
+            container.appendChild(table)
+            tables.appendChild(container)
 
             let thead = table.createTHead()
             let row = thead.insertRow()
@@ -126,7 +171,8 @@
     confirmBtn.addEventListener('click', () => {
         let data = {
             "date-from": dateFrom.value,
-            "date-to": dateTo.value
+            "date-to": dateTo.value,
+            "currency": currency.value
         }
 
         fetch("http://127.0.0.1:5000/rates/get", {
@@ -138,7 +184,7 @@
         }).then(response => {
                 if (response.ok) {
                     response.json().then(data => {
-                        renderTable(data)
+                        renderTables(data)
                     })
                 }
             }
