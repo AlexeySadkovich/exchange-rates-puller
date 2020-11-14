@@ -8,21 +8,27 @@ MONGO_HOST = os.getenv("MONGO_HOST")
 MONGO_PORT = os.getenv("MONGO_PORT")
 MONGO_DB = os.getenv("MONGO_INITDB_DATABASE")
 
-client = MongoClient(MONGO_HOST, MONGO_PORT)
+MONGO_USER = os.getenv("MONGO_INITDB_ROOT_USERNAME")
+MONGO_PASS = os.getenv("MONGO_INITDB_ROOT_PASSWORD")
+
+client = MongoClient(MONGO_HOST, int(MONGO_PORT), username=MONGO_USER, password=MONGO_PASS)
 db = client[MONGO_DB]
-collection = db['rates']
 
 
-def save(name: str, data: Dict) -> Dict:
+def save(name: str, data: Dict) -> int:
     """Save exchange information to database"""
     entry = {name: data}
-    collection.insert_one(entry)
-    return entry
+    collection = db['rates']
+    entry_id = collection.insert_one(entry).inserted_id
+
+    return entry_id
 
 
 def get_all() -> List:
     """Return all saved currency rates"""
     entries = []
+    collection = db['rates']
+
     for entry in collection.find():
         entries.append(entry)
 

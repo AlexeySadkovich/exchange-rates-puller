@@ -1,3 +1,4 @@
+import sys
 from datetime import timedelta, datetime
 from typing import Dict
 
@@ -15,17 +16,14 @@ def get_rates(date_from: str, date_to: str, currency: str) -> Dict:
 
     rates = _request_rates(date_from, date_to)
 
-    if currency == "All":
-        return rates
-
     result = {}
 
     for i in rates:
         index = 0
+        result[i] = []
         for curr in rates[i]:
-            if curr["VchCode"] == currency:
-                result[i] = {}
-                result[i][index] = curr
+            if currency == "All" or currency == curr["VchCode"]:
+                result[i].append(curr)
                 index += 1
 
     return result

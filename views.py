@@ -25,7 +25,7 @@ def get_rates():
 
 
 @app.route('/rates', methods=['GET'])
-def get_saves_rates():
+def get_saved_rates():
     """Return list of currency rates saved in database"""
     currency_rates = database.get_all()
     response = json.dumps(currency_rates)
@@ -41,5 +41,6 @@ def save_rates():
     name = f'{data["date-from"]}|{data["date-to"]}|{data["currency"]}'
     saved_entry = database.save(name, currency_rates)
 
-    return saved_entry
+    if saved_entry:
+        return {name: currency_rates}
 

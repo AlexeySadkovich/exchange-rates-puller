@@ -138,7 +138,6 @@
     let currentOptions = {}
 
     const generateInformation = (table, data) => {
-        console.log(data)
         for (let block in data) {
             let row = table.insertRow()
             for (let key in data[block]) {
@@ -169,7 +168,7 @@
             let thead = table.createTHead()
             let row = thead.insertRow()
 
-            for (let key in data[day][0]) {
+            for (let key in data[day]["0"]) {
                 let th = document.createElement("th")
                 let text = document.createTextNode(key)
 
@@ -223,7 +222,7 @@
                 if (response.ok) {
                     response.json().then(data => {
                         saveBtn.style.display = 'none'
-                        messageField.innerHTML =  "Entry " + data['name'] + " saved"
+                        messageField.innerHTML =  "Entry " + Object.keys(data)[0] + " saved"
                         messageField.style.display = 'block'
                     });
                 }
