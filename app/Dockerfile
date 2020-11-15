@@ -1,8 +1,8 @@
-FROM python:3.8-alpine
+FROM python:3.8
 
 WORKDIR /src/app
 
-RUN apk add --no-cache gcc libxml2-dev libxslt-dev musl-dev linux-headers
+RUN apt-get install -y g++ gcc libxml2-dev libxslt-dev libffi-dev
 
 COPY requirements.txt .
 RUN pip install -r requirements.txt
