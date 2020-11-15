@@ -9,6 +9,7 @@
 </head>
 <body>
 <main>
+    <a href="/saved">Saved rates</a>
     <div class="get-rates-form">
         <label>
             Date from:
@@ -193,7 +194,7 @@
 
         currentOptions = data
 
-        fetch('http://127.0.0.1:5000/rates/get', {
+        fetch('/rates/get', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json;charset=utf-8'
@@ -212,7 +213,7 @@
     });
 
     saveBtn.addEventListener('click', () => {
-        fetch('http://127.0.0.1:5000/rates/save', {
+        fetch('/rates/save', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json;charset=utf-8'

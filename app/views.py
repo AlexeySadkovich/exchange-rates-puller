@@ -1,14 +1,20 @@
 import json
 
+from bson import json_util
 from flask import request, render_template
 
 from app import app
-from . import database, services
+import database, services
 
 
 @app.route('/')
 def index():
     return render_template('index.html')
+
+
+@app.route('/saved')
+def saved():
+    return render_template('saved.html')
 
 
 @app.route('/rates/get', methods=['POST'])
@@ -27,7 +33,7 @@ def get_rates():
 def get_saved_rates():
     """Return list of currency rates saved in database"""
     currency_rates = database.get_all()
-    response = json.dumps(currency_rates)
+    response = json_util.dumps(currency_rates)
     return response
 
 

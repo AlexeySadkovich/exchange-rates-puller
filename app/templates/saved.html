@@ -9,6 +9,7 @@
 </head>
 <body>
 <main>
+    <a href="/">Get rates</a>
     <div id="result-tables">
 
     </div>
@@ -51,7 +52,6 @@
     let tables = document.querySelector('#result-tables')
 
     const generateInformation = (table, data) => {
-        console.log(data)
         for (let block in data) {
             let row = table.insertRow()
             for (let key in data[block]) {
@@ -63,11 +63,6 @@
     }
 
     const renderTables = (data) => {
-        let tables = document.querySelector('#result-tables')
-        while (tables.lastElementChild) {
-            tables.removeChild(tables.lastElementChild)
-        }
-
         for (let day in data) {
             let container = document.createElement('div')
             let header = document.createElement('h3')
@@ -94,15 +89,18 @@
         }
     }
 
-    fetch('http://127.0.0.1/rates')
+    fetch('/rates')
     .then(response => {
         response.json().then(data => {
+            console.log(data)
             for (let entry in data) {
+                console.log(entry)
                 let header = document.createElement('h2')
-                header.innerHTML = entry
+                header.innerHTML = Object.keys(data[entry])[1]
                 tables.appendChild(header)
 
-                renderTables(data[entry])
+                renderTables(data[entry][Object.keys(data[entry])[1]])
+                tables.appendChild(document.createElement('hr'))
             }
         })
     })
