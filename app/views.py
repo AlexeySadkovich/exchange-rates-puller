@@ -32,9 +32,15 @@ def get_rates():
 @app.route('/rates', methods=['GET'])
 def get_saved_rates():
     """Return list of currency rates saved in database"""
-    currency_rates = database.get_all()
-    response = json_util.dumps(currency_rates)
-    return response
+    params = request.args
+
+    currency_rates = database.get_rates_data(params)
+
+    if len(currency_rates) > 0:
+        response = json_util.dumps(currency_rates)
+        return response, 200
+    else:
+        return {"detail": "Entries not found"}, 400
 
 
 @app.route('/rates/save', methods=['POST'])

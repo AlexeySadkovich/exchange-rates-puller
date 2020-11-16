@@ -10,6 +10,67 @@
 <body>
 <main>
     <a href="/">Get rates</a>
+    <div class="options-form">
+        <label>
+            Currency:
+            <select id="currency-filter">
+                <option></option>
+                <option>All</option>
+                <option>AUD</option>
+                <option>AZN</option>
+                <option>GBP</option>
+                <option>AMD</option>
+                <option>BYN</option>
+                <option>BGN</option>
+                <option>BRL</option>
+                <option>HUF</option>
+                <option>HKD</option>
+                <option>DKK</option>
+                <option>USD</option>
+                <option>EUR</option>
+                <option>INR</option>
+                <option>KZT</option>
+                <option>CAD</option>
+                <option>KGS</option>
+                <option>CNY</option>
+                <option>MDL</option>
+                <option>NOK</option>
+                <option>PLN</option>
+                <option>RON</option>
+                <option>XDR</option>
+                <option>SGD</option>
+                <option>TJS</option>
+                <option>TRY</option>
+                <option>TMT</option>
+                <option>UZS</option>
+                <option>UAH</option>
+                <option>CZK</option>
+                <option>SEK</option>
+                <option>CHF</option>
+                <option>ZAR</option>
+                <option>KRW</option>
+                <option>JPY</option>
+            </select>
+        </label>
+        <div id="sort-params">
+            <label>
+                Sort by:
+                <select id="sort_by-select">
+                    <option></option>
+                    <option>Date from</option>
+                    <option>Date to</option>
+                </select>
+            </label>
+            <label>
+                <select id="order-select">
+                    <option>ascending</option>
+                    <option>descending</option>
+                </select>
+            </label>
+        </div>
+        <button id="confirm-btn" type="submit">Get</button>
+        <p id="message"></p>
+    </div>
     <div id="result-tables">
 
     </div>
@@ -22,6 +83,27 @@
         display: flex;
         flex-direction: column;
         justify-content: center;
+    }
+
+    .options-form {
+        display: flex;
+        justify-content: center;
+        flex-direction: column;
+        margin: 10% auto 0;
+        min-width: 20%;
+        max-width: 40%;
+    }
+
+    .options-form label {
+        padding: 10px;
+    }
+
+    #confirm-btn {
+        margin-top: 10px;
+    }
+
+    #message {
+        display: none;
     }
 
     #result-tables {
@@ -49,6 +131,13 @@
 </style>
 
 <script>
+    let currency = document.querySelector('#currency-filter')
+    let sortBy = document.querySelector('#sort_by-select')
+    let order = document.querySelector('#order-select')
+
+    let confirmBtn = document.querySelector('#confirm-btn')
+    let messageField = document.querySelector('#message')
+
     let tables = document.querySelector('#result-tables')
 
     const generateInformation = (table, data) => {
@@ -89,20 +178,43 @@
         }
     }
 
-    fetch('/rates')
-    .then(response => {
-        response.json().then(data => {
-            console.log(data)
-            for (let entry of data) {
-                let header = document.createElement('h2')
-                let name = entry["date-from"] + "|" + entry["date-to"] + "|" + entry["currency"]
-                header.innerHTML = name
-                tables.appendChild(header)
 
-                renderTables(entry["entries"])
-                tables.appendChild(document.createElement('hr'))
-            }
+    confirmBtn.addEventListener('click', () => {
+        let params = new URLSearchParams({
+            "filter": currency.value,
+            "sort_by": sortBy.value,
+            "order": order.value == "ascending" ? 1 : -1
         })
+
+        fetch('/rates?' + params)
+            .then(response => {
+                if (response.ok) {
+                    response.json().then(data => {
+                        console.log(data)
+                            while (tables.lastElementChild) {
+                                tables.removeChild(tables.lastElementChild)
+                            }
+
+                            messageField.style.display = 'none'
+
+                            for (let entry of data) {
+                                let header = document.createElement('h2')
+                                let name = entry["date-from"] + "|" + entry["date-to"] + "|" + entry["currency"]
+                                header.innerHTML = name
+                                tables.appendChild(header)
+
+                                renderTables(entry["entries"])
+                                tables.appendChild(document.createElement('hr'))
+                            }
+                    })
+                } else {
+                    response.json().then(data => {
+                        messageField.style.display = 'block'
+                        messageField.innerHTML = data.detail
+                    })
+                }
+            })
     })
+
 </script>
 </html>

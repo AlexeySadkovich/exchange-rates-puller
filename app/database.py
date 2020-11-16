@@ -22,12 +22,30 @@ def save(entry: Dict) -> int:
     return entry_id
 
 
-def get_all() -> List:
+def get_rates_data(params: Dict) -> List:
     """Return all saved currency rates"""
     entries = []
     collection = db['rates']
 
-    for entry in collection.find():
-        entries.append(entry)
+    filter_by = params["filter"]
+    sort_by = params["sort_by"]
+    order = int(params["order"])
+
+    if len(sort_by) > 0:
+        if len(filter_by) > 0:
+            sort_by = sort_by.replace(" ", "-").lower()
+
+            for entry in collection.find({"currency": filter_by}).sort(sort_by, order):
+                entries.append(entry)
+        else:
+            for entry in collection.find().sort(sort_by, order):
+                entries.append(entry)
+    else:
+        if len(filter_by) > 0:
+            for entry in collection.find({"currency": filter_by}):
+                entries.append(entry)
+        else:
+            for entry in collection.find():
+                entries.append(entry)
 
     return entries
