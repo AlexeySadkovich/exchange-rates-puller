@@ -155,12 +155,12 @@
             tables.removeChild(tables.lastElementChild)
         }
 
-        for (let day in data) {
+        for (let entry of data) {
             let container = document.createElement('div')
             let header = document.createElement('h3')
             let table = document.createElement('table')
 
-            header.innerHTML = day
+            header.innerHTML = entry["date"]
 
             container.appendChild(header)
             container.appendChild(table)
@@ -169,7 +169,7 @@
             let thead = table.createTHead()
             let row = thead.insertRow()
 
-            for (let key in data[day]["0"]) {
+            for (let key in entry["data"][0]) {
                 let th = document.createElement("th")
                 let text = document.createTextNode(key)
 
@@ -177,7 +177,7 @@
                 row.appendChild(th)
             }
 
-            generateInformation(table, data[day])
+            generateInformation(table, entry["data"])
         }
     }
 
@@ -203,6 +203,7 @@
         }).then(response => {
                 if (response.ok) {
                     response.json().then(data => {
+                        console.log(data)
                         renderTables(data)
                         messageField.style.display = 'none'
                         saveBtn.style.display = 'block'
@@ -223,7 +224,9 @@
                 if (response.ok) {
                     response.json().then(data => {
                         saveBtn.style.display = 'none'
-                        messageField.innerHTML =  "Entry " + Object.keys(data)[0] + " saved"
+
+                        let name = data["date-from"] + "|" + data["date-to"] + "|" + data["currency"]
+                        messageField.innerHTML =  "Entry " + name + " saved"
                         messageField.style.display = 'block'
                     });
                 }

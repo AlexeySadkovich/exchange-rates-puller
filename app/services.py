@@ -1,6 +1,6 @@
 import sys
 from datetime import timedelta, datetime
-from typing import Dict
+from typing import List
 
 import xmltodict
 from zeep import Client
@@ -10,41 +10,53 @@ SERVICE_URL = "http://www.cbr.ru/DailyInfoWebServ/DailyInfo.asmx?WSDL"
 DELTA_TIME = timedelta(days=1)
 
 
-def get_rates(date_from: str, date_to: str, currency: str) -> Dict:
+def get_rates(date_from: str, date_to: str, currency: str) -> List:
     date_from = datetime.strptime(date_from, "%Y-%m-%d")
     date_to = datetime.strptime(date_to, "%Y-%m-%d")
 
     rates = _request_rates(date_from, date_to)
+    result = []
 
-    result = {}
-
+    # Take only necessary information
     for i in rates:
-        index = 0
-        result[i] = []
-        for curr in rates[i]:
+        entry = {"date": i["date"], "data": []}
+
+        for curr in i["data"]:
             if currency == "All" or currency == curr["VchCode"]:
-                result[i].append(curr)
-                index += 1
+                entry["data"].append(curr)
+
+        result.append(entry)
 
     return result
 
 
-def _request_rates(date_from: datetime, date_to: datetime) -> Dict:
-    """Return information about currency rates from cbr web service"""
-    result = {}
-    start_date = date_from
+def _request_rates(date_from: datetime, date_to: datetime) -> List:
+    """Return information about currency rates from cbr web service.
+        result: [{
+            date:
+            data: [
+                {Vname: , Vnom: , Vcurs: , Vcode: , VchCode: ,},
+                ...
+            ]
+        }, ...]
+    """
+    result = []
+    current_date = date_from
 
-    while start_date <= date_to:
-        client = Client(SERVICE_URL)
-        xml = client.service.GetCursOnDateXML(start_date)
+    client = Client(SERVICE_URL)
+
+    while current_date <= date_to:
+        entry = {}
+        xml = client.service.GetCursOnDateXML(current_date)
 
         # Parse response from cbr service
         xml_str = etree.tostring(xml)
         currency_data = xmltodict.parse(xml_str)['ValuteData']['ValuteCursOnDate']
 
-        date = start_date.strftime("%Y-%m-%d")
-        result[date] = currency_data
+        entry["date"] = current_date.strftime("%Y-%m-%d")
+        entry["data"] = currency_data
+        result.append(entry)
 
-        start_date += DELTA_TIME
+        current_date += DELTA_TIME
 
     return result

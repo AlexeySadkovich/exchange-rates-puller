@@ -24,7 +24,7 @@ def get_rates():
     data = request.get_json()
 
     currency_rates = services.get_rates(data["date-from"], data["date-to"], data["currency"])
-    response = json.dumps(currency_rates)
+    response = json_util.dumps(currency_rates)
 
     return response
 
@@ -42,10 +42,20 @@ def save_rates():
     """Save exchange rates to database"""
     data = request.get_json()
 
-    currency_rates = services.get_rates(data["date-from"], data["date-to"], data["currency"])
-    name = f'{data["date-from"]}|{data["date-to"]}|{data["currency"]}'
-    saved_entry = database.save(name, currency_rates)
+    date_from = data["date-from"]
+    date_to = data["date-to"]
+    currency = data["currency"]
+
+    currency_rates = services.get_rates(date_from, date_to, currency)
+
+    entry = {
+        "date-from": date_from,
+        "date-to": date_to,
+        "currency": currency,
+        "entries": currency_rates
+    }
+    saved_entry = database.save(entry)
 
     if saved_entry:
-        return {name: currency_rates}
+        return json_util.dumps(entry)
 
