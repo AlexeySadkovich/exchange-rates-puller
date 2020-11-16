@@ -208,6 +208,11 @@
                         messageField.style.display = 'none'
                         saveBtn.style.display = 'block'
                     });
+                } else {
+                    response.json().then(data => {
+                        messageField.style.display = 'block'
+                        messageField.innerHTML = data["detail"]
+                    })
                 }
             }
         )

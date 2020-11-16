@@ -68,6 +68,14 @@
                 </select>
             </label>
         </div>
+        <label>
+                Date from:
+                <input type="date" id="date-from-input"/>
+            </label>
+            <label>
+                Date to:
+                <input type="date" id="date-to-input"/>
+            </label>
         <button id="confirm-btn" type="submit">Get</button>
         <p id="message"></p>
     </div>
@@ -135,6 +143,9 @@
     let sortBy = document.querySelector('#sort_by-select')
     let order = document.querySelector('#order-select')
 
+    let dateFrom = document.querySelector('#date-from-input')
+    let dateTo = document.querySelector('#date-to-input')
+
     let confirmBtn = document.querySelector('#confirm-btn')
     let messageField = document.querySelector('#message')
 
@@ -180,10 +191,16 @@
 
 
     confirmBtn.addEventListener('click', () => {
+         while (tables.lastElementChild) {
+            tables.removeChild(tables.lastElementChild)
+        }
+
         let params = new URLSearchParams({
             "filter": currency.value,
             "sort_by": sortBy.value,
-            "order": order.value == "ascending" ? 1 : -1
+            "order": order.value == "ascending" ? 1 : -1,
+            "date-from": dateFrom.value,
+            "date-to": dateTo.value
         })
 
         fetch('/rates?' + params)
@@ -191,10 +208,6 @@
                 if (response.ok) {
                     response.json().then(data => {
                         console.log(data)
-                            while (tables.lastElementChild) {
-                                tables.removeChild(tables.lastElementChild)
-                            }
-
                             messageField.style.display = 'none'
 
                             for (let entry of data) {
@@ -210,7 +223,7 @@
                 } else {
                     response.json().then(data => {
                         messageField.style.display = 'block'
-                        messageField.innerHTML = data.detail
+                        messageField.innerHTML = data["detail"]
                     })
                 }
             })

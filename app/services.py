@@ -1,6 +1,6 @@
 import sys
-from datetime import timedelta, datetime
-from typing import List
+from datetime import timedelta, datetime, date
+from typing import List, Optional
 
 import xmltodict
 from zeep import Client
@@ -10,9 +10,18 @@ SERVICE_URL = "http://www.cbr.ru/DailyInfoWebServ/DailyInfo.asmx?WSDL"
 DELTA_TIME = timedelta(days=1)
 
 
-def get_rates(date_from: str, date_to: str, currency: str) -> List:
+def get_rates(date_from: str, date_to: str, currency: str) -> (Optional[List], Optional[str]):
+    if len(date_from) == 0:
+        return None, "Invalid date"
+
+    if len(date_to) == 0:
+        date_to = date.today().strftime("%Y-%m-%d")
+
     date_from = datetime.strptime(date_from, "%Y-%m-%d")
     date_to = datetime.strptime(date_to, "%Y-%m-%d")
+
+    if date_from.date() > datetime.now().date() or date_to.date() > datetime.now().date():
+        return None, "Invalid date"
 
     rates = _request_rates(date_from, date_to)
     result = []
@@ -27,7 +36,7 @@ def get_rates(date_from: str, date_to: str, currency: str) -> List:
 
         result.append(entry)
 
-    return result
+    return result, None
 
 
 def _request_rates(date_from: datetime, date_to: datetime) -> List:

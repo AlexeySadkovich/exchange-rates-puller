@@ -1,5 +1,6 @@
 import os
-from typing import Dict, List
+from datetime import date, datetime
+from typing import Dict, List, Optional
 
 from pymongo import MongoClient
 
@@ -22,30 +23,44 @@ def save(entry: Dict) -> int:
     return entry_id
 
 
-def get_rates_data(params: Dict) -> List:
-    """Return all saved currency rates"""
+def get_rates_data(params: Dict) -> (Optional[List], Optional[str]):
+    """Return saved currency rates with applied filters and sorting"""
     entries = []
     collection = db['rates']
 
     filter_by = params["filter"]
     sort_by = params["sort_by"]
     order = int(params["order"])
+    date_from = params["date-from"]
+    date_to = params["date-to"]
+
+    if len(date_to) == 0 or datetime.strptime(date_to, "%Y-%m-%d").date() > datetime.now().date():
+        date_to = date.today().strftime("%Y-%m-%d")
+
+    if len(date_from) > 0 and datetime.strptime(date_from, "%Y-%m-%d").date() > datetime.now().date():
+        return None, "Invalid date"
+
+    if len(date_from) == 0:
+        date_from = date(1970, 1, 1).strftime("%Y-%m-%d")
+
+    filter_params = {
+        "date-from": {"$gte": date_from},
+        "date-to": {"$lte": date_to}
+    }
+
+    if len(filter_by) > 0:
+        filter_params["currency"] = filter_by
 
     if len(sort_by) > 0:
-        if len(filter_by) > 0:
-            sort_by = sort_by.replace(" ", "-").lower()
+        sort_by = sort_by.replace(" ", "-").lower()
 
-            for entry in collection.find({"currency": filter_by}).sort(sort_by, order):
-                entries.append(entry)
-        else:
-            for entry in collection.find().sort(sort_by, order):
-                entries.append(entry)
+        for entry in collection.find(filter_params).sort(sort_by, order):
+            entries.append(entry)
     else:
-        if len(filter_by) > 0:
-            for entry in collection.find({"currency": filter_by}):
-                entries.append(entry)
-        else:
-            for entry in collection.find():
-                entries.append(entry)
+        for entry in collection.find(filter_params):
+            entries.append(entry)
 
-    return entries
+    if len(entries) == 0:
+        return None, "Entries not found"
+
+    return entries, None

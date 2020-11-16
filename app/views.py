@@ -23,7 +23,10 @@ def get_rates():
      date-from and date-to fields in request"""
     data = request.get_json()
 
-    currency_rates = services.get_rates(data["date-from"], data["date-to"], data["currency"])
+    currency_rates, msg = services.get_rates(data["date-from"], data["date-to"], data["currency"])
+    if not currency_rates:
+        return {"detail": msg}, 400
+
     response = json_util.dumps(currency_rates)
 
     return response
@@ -34,13 +37,13 @@ def get_saved_rates():
     """Return list of currency rates saved in database"""
     params = request.args
 
-    currency_rates = database.get_rates_data(params)
+    currency_rates, msg = database.get_rates_data(params)
 
-    if len(currency_rates) > 0:
-        response = json_util.dumps(currency_rates)
-        return response, 200
-    else:
-        return {"detail": "Entries not found"}, 400
+    if not currency_rates:
+        return {"detail": msg}, 400
+
+    response = json_util.dumps(currency_rates)
+    return response, 200
 
 
 @app.route('/rates/save', methods=['POST'])
@@ -52,7 +55,9 @@ def save_rates():
     date_to = data["date-to"]
     currency = data["currency"]
 
-    currency_rates = services.get_rates(date_from, date_to, currency)
+    currency_rates, msg = services.get_rates(date_from, date_to, currency)
+    if not currency_rates:
+        return {"detail": msg}, 400
 
     entry = {
         "date-from": date_from,
@@ -64,4 +69,3 @@ def save_rates():
 
     if saved_entry:
         return json_util.dumps(entry)
-
